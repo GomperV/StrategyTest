@@ -34,7 +34,6 @@ public class TaskManagerAI : MonoBehaviour
             }
         }
 
-
         territories = objectsWithBorderAI.Count;
         print("Ilosc obszaru AI: " + territories);
 
@@ -45,12 +44,14 @@ public class TaskManagerAI : MonoBehaviour
         int operacja = Random.Range(0, 3);
         if (operacja == 0)
         {
-
+            //zbuduj tartak
         } else if(operacja == 1)
         {
+            //zbuduj kamieniolom
             
         } else if(operacja == 2)
         {
+            //zbuduj straznice
 
         }
         task.GetComponent<SpriteRenderer>().color = Color.black;

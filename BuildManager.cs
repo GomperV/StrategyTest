@@ -70,5 +70,17 @@ public class BuildManager : MonoBehaviour
             UpdateResourceTexts();
         }
     }
-    // Add new resource methods here
+    public void BuildKoszary()
+    {
+        buildingType = "koszary";
+        stoneCost = 30;
+        woodCost = 30;
+        if (resources["kamien"] >= stoneCost && resources["drewno"] >= woodCost)
+        {
+            resources["kamien"] -= stoneCost;
+            resources["drewno"] -= woodCost;
+            canBuild = true;
+            UpdateResourceTexts();
+        }
+    }
 }

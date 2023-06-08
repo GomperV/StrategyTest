@@ -7,6 +7,7 @@ public class TurnManagerScript : MonoBehaviour
 {
     public int liczbaKamieniolomow, liczbaTartakow, liczbaZlota, liczbaStraznic, liczbaKoszar, ktoraTura;
     int[] iloscBudynkow;
+    private GameObject koszaryManager;
     [SerializeField] private TMP_Text KtoraTuraTXT;
 
     // Start is called before the first frame update
@@ -33,12 +34,31 @@ public class TurnManagerScript : MonoBehaviour
         GameObject go = GameObject.FindWithTag("Teren");
         SquareScript square = go.GetComponent<SquareScript>();
 
-        GameObject ai = GameObject.Find("EnemyAI");
-        TaskManagerAI task = ai.GetComponent<TaskManagerAI>();
+        koszaryManager = GameObject.Find("KoszaryManager");
+        KoszaryManager km = koszaryManager.GetComponent<KoszaryManager>();
 
-        task.GroundControl();
+        int lucznikCount = km.iloscZolnierzy; // set to the total number of Lucznik objects in your scene
 
-        GameObject go2 = GameObject.Find("BuilderManager");
+        for (int i = 1; i <= lucznikCount; i++)
+        {
+            if (GameObject.Find("Lucznik " + i.ToString()) != null)
+            {
+                GameObject soldier = GameObject.Find("Lucznik " + i.ToString());
+                SoldierScript solsc = soldier.GetComponent<SoldierScript>();
+                solsc.iloscPrzesuniec = 1;
+            }
+        }
+
+                //        GameObject soldier = GameObject.Find("Lucznik");
+                //SoldierScript solsc = soldier.GetComponent<SoldierScript>();
+
+
+                //GameObject ai = GameObject.Find("EnemyAI");
+                //TaskManagerAI task = ai.GetComponent<TaskManagerAI>();
+
+                //task.GroundControl();
+
+                GameObject go2 = GameObject.Find("BuilderManager");
         BuildManager stats = go2.GetComponent<BuildManager>();
 
         if (liczbaKamieniolomow > 0)

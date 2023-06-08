@@ -6,16 +6,18 @@ using TMPro;
 
 public class SquareScript : MonoBehaviour
 {
-    private bool squareOccupied = false;
+    public bool squareOccupied = false;
     private bool canBuild = false;
     private bool terenZalesiony = false;
     private bool terenKamienisty = false;
     private bool terenWodny = false;
     private bool terenZwykly = false;
+    public bool visibleByPlayer;
     private bool tartakAI, kamieniolomAI, straznicaAI, koszaryAI;
     public int iloscKamieniolomow;
-    private GameObject borderPrefab;
+    private GameObject borderPrefab, koszaryManager;
     private bool terenGracza = false;
+    private string buildingOnThisSquare;
 
     public Sprite grass, stone, woods, water, tartak, kamieniolom;
     void Start()
@@ -58,6 +60,35 @@ public class SquareScript : MonoBehaviour
         }
 
     }
+
+    private void Update()
+    {
+        // Find the child object with the specified name
+        Transform border = transform.Find("border(Clone)");
+        if (buildingOnThisSquare == "straznica")
+        {
+            GetComponent<SpriteRenderer>().color = Color.black;
+            squareOccupied = true;
+        }
+        else if (buildingOnThisSquare == "koszary")
+        {
+            GetComponent<SpriteRenderer>().color = Color.cyan;
+            squareOccupied = true;
+        }
+        // Check if the child object was found
+        if (border!= null)
+        {
+            visibleByPlayer = true;
+        }
+
+        if (!visibleByPlayer && !squareOccupied)
+        {
+            GetComponent<SpriteRenderer>().color = Color.black;
+        } else if (!squareOccupied && visibleByPlayer)
+        {
+            GetComponent<SpriteRenderer>().color = Color.white;
+        } 
+    }
     void OnMouseDown()
     {
         GameObject go = GameObject.Find("BuilderManager");
@@ -66,14 +97,17 @@ public class SquareScript : MonoBehaviour
         GameObject go2 = GameObject.Find("TurnManager");
         TurnManagerScript stats = go2.GetComponent<TurnManagerScript>();
 
+        koszaryManager = GameObject.Find("KoszaryManager");
+        KoszaryManager km = koszaryManager.GetComponent<KoszaryManager>();
+
         if (transform.Find("border(Clone)") != null)
         {
-            print("twoj teren");
+            //print("twoj teren");
             terenGracza = true;
         }
         else
         {
-            print("neutral");
+            //print("neutral");
             terenGracza = false;
         }
 
@@ -83,23 +117,49 @@ public class SquareScript : MonoBehaviour
             {
                 stats.liczbaKamieniolomow += 1;
                 GetComponent<SpriteRenderer>().sprite = kamieniolom;
-                //GetComponent<SpriteRenderer>().color = Color.gray;
                 Build(builder.buildingType);
             } 
             else if(builder.buildingType == "tartak" && terenZalesiony)
             {
                 stats.liczbaTartakow += 1;
                 GetComponent<SpriteRenderer>().sprite = tartak;
-                //GetComponent<SpriteRenderer>().color = Color.yellow;
                 Build(builder.buildingType);
             }
             else if (builder.buildingType == "straznica" && terenZwykly)
             {
+                squareOccupied = true;
                 stats.liczbaStraznic += 1;
                 GetComponent<SpriteRenderer>().color = Color.black;
                 Build(builder.buildingType);
             }
+            else if (builder.buildingType == "koszary" && terenZwykly)
+            {
+                squareOccupied = true;
+                stats.liczbaKoszar += 1;
+                GetComponent<SpriteRenderer>().color = Color.cyan;
+                Build(builder.buildingType);
+
+                km.PobierzWspolrzedneKoszar(transform);
+            }
         }
+        int lucznikCount = km.iloscZolnierzy; // set to the total number of Lucznik objects in your scene
+
+
+        for (int i = 1; i <= lucznikCount; i++)
+        {
+            if (GameObject.Find("Lucznik " + i.ToString()) != null)
+            {
+                GameObject soldier = GameObject.Find("Lucznik " + i.ToString());
+                SoldierScript solsc = soldier.GetComponent<SoldierScript>();
+                if (solsc.zolnierzWybrany)
+                {
+                    print("dostalem info o wybraniu zolnierza");
+                    solsc.MoveSoldier(transform);
+                    break; // stop checking for other Lucznik objects
+                }
+            }
+        }
+
     }
 
     private void Build(string buildingType)
@@ -113,7 +173,9 @@ public class SquareScript : MonoBehaviour
         if (buildingType == "straznica")
         {
             RozszerzTeren();
-        }
+        } 
+        buildingOnThisSquare = buildingType;
+        
     }
 
     void OnMouseExit()
@@ -122,32 +184,6 @@ public class SquareScript : MonoBehaviour
         {
             GetComponent<SpriteRenderer>().color = new Color(0.764151f, 0.764151f, 0.764151f);
         }
-        //if (!squareOccupied && !terenZalesiony && !terenWodny && !terenKamienisty)
-        //{
-        //    //SpriteRenderer renderer = GetComponent<SpriteRenderer>();
-        //    //renderer.color = new Color(0.01159281f, 0.5849056f, 0f, 1f);
-        //    GetComponent<SpriteRenderer>().sprite = grass;
-        //}
-        //else if (!squareOccupied && terenZalesiony)
-        //{
-        //    //GetComponent<SpriteRenderer>().color = new Color(0, 0.3f, 0);
-        //    GetComponent<SpriteRenderer>().sprite = woods;
-        //}
-        //else if (!squareOccupied && terenWodny)
-        //{
-        //    GetComponent<SpriteRenderer>().sprite = water;
-        //    //GetComponent<SpriteRenderer>().color = Color.blue;
-        //}
-        //else if (!squareOccupied && terenKamienisty)
-        //{
-        //    GetComponent<SpriteRenderer>().sprite = stone;
-        //    //GetComponent<SpriteRenderer>().color = new Color(0.6792453f, 0.6792453f, 0.6792453f);
-        //} else if (!squareOccupied && terenZwykly)
-        //{
-        //    GetComponent<SpriteRenderer>().sprite = grass;
-        //    //SpriteRenderer renderer = GetComponent<SpriteRenderer>();
-        //    //renderer.color = new Color(0.01159281f, 0.5849056f, 0f, 1f);
-        //}
     }
     private void RozszerzTeren()
     {
